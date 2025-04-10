@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/background_color">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/preview_view"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:visibility="visible"
+        android:scaleType="fitCenter"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintHeight_percent="0.75"
+        app:layout_constraintBottom_toTopOf="@id/controls_container" />
+
+    <FrameLayout
+        android:id="@+id/camera_loading_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:background="@color/background_color"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/controls_container">
+
+        <ProgressBar
+            android:id="@+id/camera_loading_progress"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center" />
+
+        <TextView
+            android:id="@+id/camera_loading_text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_marginTop="48dp"
+            android:text="正在初始化相机..."
+            android:textSize="16sp" />
+    </FrameLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/photo_preview_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_margin="@dimen/card_margin"
+        app:cardCornerRadius="@dimen/card_corner_radius"
+        app:cardElevation="@dimen/card_elevation"
+        android:visibility="gone"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/controls_container">
+
+        <ImageView
+            android:id="@+id/photo_preview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="fitCenter" />
+
+    </com.google.android.material.card.MaterialCardView>
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/controls_container"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:padding="1dp"
+        android:background="@drawable/controls_background"
+        app:layout_constraintHeight_percent="0.25"
+        app:layout_constraintBottom_toBottomOf="parent">
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/distance_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="已知距离"
+            app:helperText="单位：cm"
+            app:helperTextEnabled="true"
+            app:endIconMode="clear_text"
+            app:errorEnabled="false"
+            android:layout_marginEnd="2dp"
+            android:minHeight="0dp"
+            app:boxStrokeWidth="1dp"
+            app:boxStrokeWidthFocused="1dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/age_input_layout"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHorizontal_weight="1">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/distance_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="numberDecimal"
+                android:textSize="12sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/age_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="年龄"
+            app:helperText="单位：岁"
+            app:helperTextEnabled="true"
+            app:endIconMode="clear_text"
+            app:errorEnabled="false"
+            android:layout_marginStart="2dp"
+            android:layout_marginEnd="2dp"
+            android:minHeight="0dp"
+            app:boxStrokeWidth="1dp"
+            app:boxStrokeWidthFocused="1dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            app:layout_constraintStart_toEndOf="@id/distance_input_layout"
+            app:layout_constraintEnd_toStartOf="@id/sex_input_layout"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHorizontal_weight="1">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/age_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="number"
+                android:textSize="12sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.textfield.TextInputLayout
+            android:id="@+id/sex_input_layout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:hint="性别"
+            app:helperText="男=true或女=false"
+            app:helperTextEnabled="true"
+            app:endIconMode="clear_text"
+            app:errorEnabled="false"
+            android:layout_marginStart="2dp"
+            android:minHeight="0dp"
+            app:boxStrokeWidth="1dp"
+            app:boxStrokeWidthFocused="1dp"
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox.Dense"
+            app:layout_constraintStart_toEndOf="@id/age_input_layout"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintHorizontal_weight="1">
+
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/sex_input"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:inputType="text"
+                android:hint="       （true/false）"
+                android:textSize="12sp"
+                android:paddingTop="4dp"
+                android:paddingBottom="4dp" />
+
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <com.google.android.material.button.MaterialButtonToggleGroup
+            android:id="@+id/photo_actions"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="2dp"
+            app:singleSelection="true"
+            app:selectionRequired="true"
+            app:layout_constraintTop_toBottomOf="@id/distance_input_layout"
+            app:layout_constraintStart_toStartOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/gallery_button"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="从相册选择"
+                android:textSize="10sp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                app:icon="@drawable/ic_gallery"
+                app:iconSize="14dp"
+                app:iconPadding="4dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/capture_button"
+                android:layout_width="wrap_content"
+                android:layout_height="38dp"
+                android:text="拍照"
+                android:textSize="10sp"
+                android:paddingStart="8dp"
+                android:paddingEnd="8dp"
+                app:icon="@drawable/ic_camera"
+                app:iconSize="14dp"
+                app:iconPadding="4dp"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton" />
+
+        </com.google.android.material.button.MaterialButtonToggleGroup>
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/retake_button"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:text="重新拍摄"
+            android:textSize="10sp"
+            android:visibility="visible"
+            android:layout_marginStart="2dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            app:icon="@drawable/ic_refresh"
+            app:iconSize="14dp"
+            app:iconPadding="4dp"
+            style="@style/Widget.MaterialComponents.Button"
+            app:layout_constraintTop_toTopOf="@id/photo_actions"
+            app:layout_constraintBottom_toBottomOf="@id/photo_actions"
+            app:layout_constraintStart_toEndOf="@id/photo_actions" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/confirm_points_button"
+            android:layout_width="wrap_content"
+            android:layout_height="38dp"
+            android:text="确认选点"
+            android:textSize="10sp"
+            android:visibility="gone"
+            android:layout_marginStart="2dp"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            app:icon="@drawable/ic_check"
+            app:iconSize="14dp"
+            app:iconPadding="4dp"
+            style="@style/Widget.MaterialComponents.Button"
+            app:layout_constraintTop_toTopOf="@id/photo_actions"
+            app:layout_constraintBottom_toBottomOf="@id/photo_actions"
+            app:layout_constraintStart_toEndOf="@id/retake_button" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/submit_button"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:text="提交测量"
+            android:textSize="12sp"
+            android:visibility="visible"
+            android:layout_marginTop="4dp"
+            app:icon="@drawable/ic_send"
+            app:iconSize="16dp"
+            app:iconPadding="4dp"
+            style="@style/Widget.MaterialComponents.Button"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintVertical_bias="0.9" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
