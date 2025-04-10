@@ -1,0 +1,142 @@
+import ui
+import photos
+import motion
+import numpy as np
+import time
+import io
+from PIL import Image
+import sympy as sp
+
+# ====== 拍照 + 重力获取 ======
+def capture_image_and_gravity():
+    print("📷 请保持手机稳定，准备拍照...")
+    motion.start_updates()
+    time.sleep(1.0)
+    img = photos.capture_image()
+    gravity = motion.get_gravity()
+    motion.stop_updates()
+
+    g = np.array(gravity)
+    
+    # ✅ 自动修正 gy 分量方向
+    if g[1] < 0:
+        g[1] = -g[1]
+        print("🔄 自动反转 gy 分量（重力方向向上已修正为向下）")
+        
+    g /= np.linalg.norm(g)
+    print("✅ 获取重力向量:", g)
+    return img, g
+
+# ====== 图像点击选点 ======
+def select_points(pil_img, num_points=4):
+    image_data = io.BytesIO()
+    pil_img.save(image_data, format='PNG')
+    ui_img = ui.Image.from_data(image_data.getvalue())
+
+    w, h = pil_img.size
+    selected_points = []
+
+    def on_touch(sender, touch):
+        if len(selected_points) < num_points:
+            loc = touch.location
+            print(f"📍 点击点：{loc}")
+            selected_points.append(loc)
+        if len(selected_points) >= num_points:
+            sender.close()
+
+    class TouchView(ui.View):
+        def __init__(self):
+            self.bg_color = 'white'
+            self.frame = (0, 0, w, h)
+            self.name = f"点击 {num_points} 个点"
+            iv = ui.ImageView(frame=(0, 0, w, h))
+            iv.image = ui_img
+            iv.flex = 'WH'
+            self.add_subview(iv)
+
+        def touch_ended(self, touch):
+            on_touch(self, touch)
+
+    v = TouchView()
+    v.present('sheet')
+    while len(selected_points) < num_points:
+        time.sleep(0.2)
+    return selected_points
+
+# ====== 数学函数 ======
+def Function_F(gravity, firstPoint, secondPoint, focalLength):
+    gx, gy, gz = gravity
+    px, py = firstPoint
+    pxp, pyp = secondPoint
+    f = focalLength
+
+    A = (gx**2 + gz**2)*(px - pxp)**2 + (gy**2 + gz**2)*(py - pyp)**2 + 2*gx*gy*(pxp - px)*(pyp - py)
+    B = 2*gz*(pxp*py - px*pyp)*(gy*(px - pxp) + gx*(pyp - py))
+    C = (gx**2 + gy**2)*(pxp*py - px*pyp)**2
+    D = gz**2
+    E = -(gx*gz*pxp + gy*gz*pyp + gx*gz*px + gy*gz*py)
+    F_term = gx**2*px*py + gx*gy*pxp*py + gx*gy*px*pyp + gy**2*py*pyp
+
+    numerator = sp.sqrt(A * f**2 + B * f + C)
+    denominator = sp.Abs(D * f**2 + E * f + F_term)
+    return numerator / denominator
+
+def calibrate_focal_length(gravity, points, L1, L2, image_width):
+    f = sp.symbols('f')
+    p1, p2 = points[0], points[1]
+    q1, q2 = points[2], points[3]
+
+    F1 = Function_F(gravity, p1, p2, f)
+    F2 = Function_F(gravity, q1, q2, f)
+    equation = (F1 / F2) - (L1 / L2)
+
+    f_guesses = [image_width / (2 * np.tan(np.deg2rad(60) / 2)), 800, 1000, 1200, 1500]
+    for guess in f_guesses:
+        try:
+            res = float(sp.nsolve(equation, f, guess))
+            print(f"✅ 使用初始值 {guess:.1f} 成功求解焦距: {res:.2f}")
+            return res
+        except Exception as e:
+            print(f"⚠️ 初始值 {guess:.1f} 求解失败: {e}")
+    raise ValueError("❌ 所有初始值都失败，请重新选择点或输入真实长度")
+
+def computeMagnificationRatio(gravity, startPoint, endPoint, length, focalLength, para_d=0):
+    gz = gravity[2]
+    f = focalLength
+    Lpp = length
+    s = abs(para_d + f * gz)
+    F = Function_F(gravity, startPoint, endPoint, f)
+    ratio = Lpp / s / F
+    return ratio
+
+# ====== 主流程 ======
+def main():
+    pil_img, gravity = capture_image_and_gravity()
+    img_np = np.array(pil_img)
+    h, w = img_np.shape[:2]
+    center = np.array([w / 2, h / 2])
+
+    print("\n👉 请依次点击两对参考点（共 4 个）")
+    points = select_points(pil_img, num_points=4)
+    points = np.array(points) - center
+
+    L1 = float(input("请输入第一个已知长度 (cm)："))
+    L2 = float(input("请输入第二个已知长度 (cm)："))
+
+    f = calibrate_focal_length(gravity, points, L1, L2, image_width=w)
+    print(f"\n📐 焦距估计值：{f:.2f} 像素")
+
+    e = computeMagnificationRatio(gravity, points[0], points[1], L1, f)
+    print(f"🔍 放大比例：{e:.5f} cm/像素")
+
+    print("\n📏 请点击两个测量点")
+    mpoints = select_points(pil_img, num_points=2)
+    mpoints = np.array(mpoints) - center
+
+    F_val = Function_F(gravity, mpoints[0], mpoints[1], f)
+    s = abs(f * gravity[2])
+    distance = e * s * F_val
+    print(f"\n✅ 测量结果：{distance:.2f} cm")
+
+if __name__ == '__main__':
+    main()
